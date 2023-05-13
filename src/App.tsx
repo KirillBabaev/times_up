@@ -1,7 +1,9 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 import TimesheetTable from "./component/TimesheetTable";
+import {Navigation} from "./component/Navigation";
+import {Route, Routes} from "react-router-dom";
+import {Dashboard} from "./component/Dashboard";
 
 const issues = [
     {
@@ -37,7 +39,7 @@ const timeEntries = [
     {
         issueId: '2',
         date: new Date(2023, 3, 3),
-        timeSpent: 60,
+        timeSpent: 120,
     },
     {
         issueId: '3',
@@ -48,8 +50,12 @@ const timeEntries = [
 
 function App() {
     return (
-        <div className="border px-4">
-            <TimesheetTable issues={issues} timeEntries={timeEntries}/>
+        <div>
+            <Navigation/>
+            <Routes>
+                <Route path="/timesheet" element={<TimesheetTable issues={issues} timeEntries={timeEntries}/>}/>
+                <Route path="/dashboard" element={<Dashboard/>}/>
+            </Routes>
         </div>
     );
 }
