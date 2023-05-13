@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {addMonths, format, getDaysInMonth, isToday, isWeekend, setDate} from 'date-fns';
 import {IIssue, ITimeEntry} from "../model/IIssue";
+import {getIssues} from "../services/gitLabAPI";
 
 interface TimesheetTableProps {
     issues: IIssue[];
@@ -10,6 +11,7 @@ interface TimesheetTableProps {
 const TimesheetTable = ({issues, timeEntries}: TimesheetTableProps) => {
     const [month, setMonth] = useState(new Date());
 
+
     useEffect(() => {
         // Здесь можно загрузить данные об отслеживании времени для задач
         // и сохранить их в состоянии timeEntries
@@ -17,6 +19,11 @@ const TimesheetTable = ({issues, timeEntries}: TimesheetTableProps) => {
 
     const daysInMonth = getDaysInMonth(month);
     const daysArray = Array.from({length: daysInMonth}, (_, i) => i + 1);
+
+    console.log(getIssues("babaechi/times_up"));
+
+
+
 
     const formatTime = (minutes: number) => {
         const hours = Math.floor(minutes / 60);
