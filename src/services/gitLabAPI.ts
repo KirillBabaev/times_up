@@ -21,29 +21,46 @@ export const client = new ApolloClient({
 // Пример функции для получения списка задач
 export const getIssues = async (projectId: string) => {
     const query = gql`
-    query GetIssues($projectId: ID!) {
-      project(fullPath: $projectId) {
-        issues {
-          nodes {
-            id
-            iid
-            title
-            createdAt
-            dueDate
-            timeEstimate
+    query {
+  currentUser {
+    name
+    projectMemberships{
+      nodes{
+        project{
+          name
+          issues{
+            nodes{
+              id
+              title
+              description
+              timelogs {
+                edges {
+                  node {
+                    id
+                    issue {
+                      id
+                    }
+                    timeSpent
+                    summary
+                  }
+                }
+              }
+            }
           }
         }
       }
     }
+}
+}
   `;
 
     try {
         const {data} = await client.query({
-            query,
-            variables: {projectId},
+            query
+            // variables: {projectId},
         });
 
-        return data.project.issues.nodes;
+        return data;
     } catch (error) {
         console.error('Error fetching issues:', error);
         throw error;

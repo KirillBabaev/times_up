@@ -25,17 +25,14 @@ const TimesheetTable = ({issues, timeEntries}: TimesheetTableProps) => {
 
 
 
-    const formatTime = (minutes: number) => {
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
+    const formatTime = (seconds: number) => {
+        const hours = Math.floor(seconds / 3600);
+        const mins = seconds % 3600;
         return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
     };
 
     const formatDay = (day: number) => {
-        console.log("Day number is " + day);
-        console.log("Month is " + month);
         const date = setDate(month, day);
-        console.log("Date we set is " + date);
         return format(date, 'd E');
     }
 
@@ -53,7 +50,7 @@ const TimesheetTable = ({issues, timeEntries}: TimesheetTableProps) => {
     }
 
     const getManDays = (time: number) => {
-        return time / 480;
+        return time / 28800;
     }
 
     const switchMonth = (month: Date, amount: number) => {

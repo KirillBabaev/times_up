@@ -24,27 +24,27 @@ const timeEntries = [
     {
         issueId: '1',
         date: new Date(2023, 3, 1),
-        timeSpent: 120,
+        timeSpent: 7200,
     },
     {
         issueId: '1',
         date: new Date(2023, 3, 2),
-        timeSpent: 180,
+        timeSpent: 10800,
     },
     {
         issueId: '2',
         date: new Date(2023, 3, 1),
-        timeSpent: 240,
+        timeSpent: 14400,
     },
     {
         issueId: '2',
         date: new Date(2023, 3, 3),
-        timeSpent: 120,
+        timeSpent: 7200,
     },
     {
         issueId: '3',
         date: new Date(2023, 3, 2),
-        timeSpent: 300,
+        timeSpent: 18000,
     },
 ];
 
