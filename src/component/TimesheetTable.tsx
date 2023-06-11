@@ -1,18 +1,19 @@
 import React, {useEffect, useState} from 'react';
-import {addMonths, format, getDaysInMonth, isToday, isWeekend, setDate} from 'date-fns';
-import {IIssue, ITimeEntry} from "../model/IIssue";
-import {getIssues} from "../services/gitLabAPI";
+import {addMonths, format, getDaysInMonth, getMonth} from 'date-fns';
+import {Issue, Timelog} from "../gql/graphql";
+import {getDayColor, formatDay, formatTime, getManDays} from "../utils/DateTimeUtils"
+
 
 interface TimesheetTableProps {
-    issues: IIssue[];
-    timeEntries: ITimeEntry[]
+    issues: Issue[];
+    timeEntries: Timelog[]
 }
 
 const TimesheetTable = ({issues, timeEntries}: TimesheetTableProps) => {
     const [month, setMonth] = useState(new Date());
 
-
     useEffect(() => {
+        console.log("Month was switched")
         // Здесь можно загрузить данные об отслеживании времени для задач
         // и сохранить их в состоянии timeEntries
     }, [month]);
@@ -20,37 +21,18 @@ const TimesheetTable = ({issues, timeEntries}: TimesheetTableProps) => {
     const daysInMonth = getDaysInMonth(month);
     const daysArray = Array.from({length: daysInMonth}, (_, i) => i + 1);
 
-    console.log(getIssues("babaechi/times_up"));
-
-
-
-
-    const formatTime = (seconds: number) => {
-        const hours = Math.floor(seconds / 3600);
-        const mins = seconds % 3600;
-        return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
-    };
-
-    const formatDay = (day: number) => {
-        const date = setDate(month, day);
-        return format(date, 'd E');
-    }
-
-
     const getTotalTimeForIssue = (issueId: string) => {
         const totalTime = timeEntries
-            .filter((entry) => entry.issueId === issueId)
+            .filter((entry) => entry.issue?.id === issueId  &&
+                getMonth(new Date(entry.spentAt)) === getMonth(month))
             .reduce((sum, entry) => sum + entry.timeSpent, 0);
         return formatTime(totalTime);
     };
 
     const getTotalTimeForMonthInManDays = () => {
-        const totalTime = timeEntries.map(entry => entry.timeSpent).reduce((sum, time) => sum + time);
+        const totalTime = timeEntries.filter(entry => getMonth(new Date(entry.spentAt)) === getMonth(month))
+                                    .map(entry => entry.timeSpent).reduce((sum, time) => sum + time);
         return getManDays(totalTime);
-    }
-
-    const getManDays = (time: number) => {
-        return time / 28800;
     }
 
     const switchMonth = (month: Date, amount: number) => {
@@ -58,32 +40,27 @@ const TimesheetTable = ({issues, timeEntries}: TimesheetTableProps) => {
         setMonth(result);
     }
 
-    const getTimeForIssueAndDay = (issueId: string, day: number) => {
+    const getTimeForIssueAndDay = (issueId: string, day: number, month: Date) => {
         const entry = timeEntries.find(
-            (entry) => entry.issueId === issueId && format(entry.date, 'd') === day.toString()
-        );
+            (entry) => entry.issue?.id === issueId &&
+                format(new Date(entry.spentAt), 'd') === day.toString() &&
+                getMonth(new Date(entry.spentAt)) === getMonth(month));
         return entry ? formatTime(entry.timeSpent) : '';
     };
 
-    const getDayColor = (date: Date) => {
-        return isWeekend(date) ?
-            // выходной
-            (isToday(date) ? "bg-cyan-100" : "bg-emerald-100") :
-            // не выходной
-            (isToday(date) ? "bg-cyan-100" : "");
-    }
-
     return (
         <div className="overflow-x-auto">
+            <div className="sticky left-0">
             <button onClick={() => switchMonth(month, -1)} className="px-4 py-2 m-3 rounded border">prev month</button>
             <button onClick={() => switchMonth(month, 1)} className="px-4 py-2 m-3 rounded border">next month</button>
+            </div>
             <table className="border-collapse w-full text-xs">
                 <thead className="border">
                 <tr className="bg-gray-200">
                     <th className="sticky left-0 bg-gray-200 px-4 py-2 font-normal">Issue</th>
                     {daysArray.map((day) => (
                         <th key={day} className="px-4 py-2 font-normal w-8">
-                            {formatDay(day)}
+                            {formatDay(day, month)}
                         </th>
                     ))}
                     <th className="px-4 py-2">Total</th>
@@ -96,7 +73,7 @@ const TimesheetTable = ({issues, timeEntries}: TimesheetTableProps) => {
                         {daysArray.map((day) => (
                             <td key={day}
                                 className={"border px-4 py-2 " + getDayColor(new Date(month.getFullYear(), month.getMonth(), day))}>
-                                {getTimeForIssueAndDay(issue.id, day)}
+                                {getTimeForIssueAndDay(issue.id, day, month)}
                             </td>
                         ))}
                         <td className="border px-4 py-2">{getTotalTimeForIssue(issue.id)}</td>
@@ -105,14 +82,6 @@ const TimesheetTable = ({issues, timeEntries}: TimesheetTableProps) => {
                 <tr className="text-center font-bold">
                     <td colSpan={daysInMonth + 2}
                         className="border px-4 py-2 text-left">MND: {getTotalTimeForMonthInManDays()}</td>
-                    {/*{daysArray.map((day) => (*/}
-                    {/*    <td key={day} className="border px-4 py-2">*/}
-                    {/*        /!* Здесь можно вычислить сумму времени за каждый день *!/*/}
-                    {/*    </td>*/}
-                    {/*))}*/}
-                    {/*<td className="border px-4 py-2">*/}
-                    {/*    /!* Здесь можно вычислить общую сумму времени за весь месяц *!/*/}
-                    {/*</td>*/}
                 </tr>
                 </tbody>
             </table>

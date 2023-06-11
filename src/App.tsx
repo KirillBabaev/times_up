@@ -1,59 +1,37 @@
 import React from 'react';
-import './App.css';
+// import './App.css';
 import TimesheetTable from "./component/TimesheetTable";
 import {Navigation} from "./component/Navigation";
 import {Route, Routes} from "react-router-dom";
 import {Dashboard} from "./component/Dashboard";
+import {Issue, ProjectMember, Timelog} from "./gql/graphql";
+import {useQuery} from "@apollo/client";
+import {ALL_ISSUES} from "./services/queries";
 
-const issues = [
-    {
-        id: '1',
-        title: 'Issue 1',
-    },
-    {
-        id: '2',
-        title: 'Issue 2',
-    },
-    {
-        id: '3',
-        title: 'Issue 3',
-    },
-];
-
-const timeEntries = [
-    {
-        issueId: '1',
-        date: new Date(2023, 3, 1),
-        timeSpent: 7200,
-    },
-    {
-        issueId: '1',
-        date: new Date(2023, 3, 2),
-        timeSpent: 10800,
-    },
-    {
-        issueId: '2',
-        date: new Date(2023, 3, 1),
-        timeSpent: 14400,
-    },
-    {
-        issueId: '2',
-        date: new Date(2023, 3, 3),
-        timeSpent: 7200,
-    },
-    {
-        issueId: '3',
-        date: new Date(2023, 3, 2),
-        timeSpent: 18000,
-    },
-];
+function useIssuesData() {
+    const { data, loading, error } = useQuery(ALL_ISSUES);
+    return { data, loading, error };
+}
 
 function App() {
+
+    const {data : IssuesData, loading : IssuesLoading} = useIssuesData();
+    const issues: Issue[] = IssuesData?.currentUser?.projectMemberships.nodes.flatMap((project: ProjectMember) => project?.project?.issues?.nodes) ?? [];
+    const timeEntries: (Timelog | null | undefined)[] = issues
+                                                        .flatMap(issue => issue.timelogs.nodes)
+                                                        .filter(timelog => timelog && timelog.user?.id === IssuesData?.currentUser?.id)??[];
+
+    //console.log(format(dft, 'd'));
+    if (IssuesLoading){
+        return (
+            <h2 className="text-center">Loading...</h2>
+        )
+    }
     return (
         <div>
             <Navigation/>
             <Routes>
-                <Route path="/timesheet" element={<TimesheetTable issues={issues} timeEntries={timeEntries}/>}/>
+                <Route path="/timesheet" element={<TimesheetTable issues={issues} timeEntries={timeEntries as any}/>}/>
                 <Route path="/dashboard" element={<Dashboard/>}/>
             </Routes>
         </div>
