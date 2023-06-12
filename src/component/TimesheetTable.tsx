@@ -21,25 +21,48 @@ const TimesheetTable = ({issues, timeEntries}: TimesheetTableProps) => {
     const daysInMonth = getDaysInMonth(month);
     const daysArray = Array.from({length: daysInMonth}, (_, i) => i + 1);
 
+    /**
+     * Calculates the total time spent on a specific issue.
+     * @param issueId - The ID of the issue.
+     * @returns The formatted total time spent on the issue.
+     */
     const getTotalTimeForIssue = (issueId: string) => {
-        const totalTime = timeEntries
-            .filter((entry) => entry.issue?.id === issueId  &&
+
+        const totalTime = timeEntries.filter((entry) => entry.issue?.id === issueId &&
                 getMonth(new Date(entry.spentAt)) === getMonth(month))
             .reduce((sum, entry) => sum + entry.timeSpent, 0);
+
         return formatTime(totalTime);
     };
 
+    /**
+     * Calculates the total time spent in man-days for a specific month.
+     * @returns The total time spent in man-days for the month.
+     */
     const getTotalTimeForMonthInManDays = () => {
         const totalTime = timeEntries.filter(entry => getMonth(new Date(entry.spentAt)) === getMonth(month))
-                                    .map(entry => entry.timeSpent).reduce((sum, time) => sum + time);
+            .map(entry => entry.timeSpent).reduce((sum, time) => sum + time);
         return getManDays(totalTime);
     }
 
+    /**
+     * Switches the month by adding or subtracting a specified amount of months.
+     * @param month - The current month.
+     * @param amount - The number of months to add or subtract. Use a positive number to move forward in time and a negative number to move backward.
+     */
     const switchMonth = (month: Date, amount: number) => {
         const result = addMonths(month, amount);
         setMonth(result);
     }
 
+
+    /**
+     * Retrieves the time spent on a specific issue for a given day and month.
+     * @param issueId - The ID of the issue.
+     * @param day - The day of the month (1-31).
+     * @param month - The month for which to retrieve the time entries.
+     * @returns The formatted time spent on the issue, or an empty string if no entry is found.
+     */
     const getTimeForIssueAndDay = (issueId: string, day: number, month: Date) => {
         const entry = timeEntries.find(
             (entry) => entry.issue?.id === issueId &&
@@ -51,8 +74,10 @@ const TimesheetTable = ({issues, timeEntries}: TimesheetTableProps) => {
     return (
         <div className="overflow-x-auto">
             <div className="sticky left-0">
-            <button onClick={() => switchMonth(month, -1)} className="px-4 py-2 m-3 rounded border">prev month</button>
-            <button onClick={() => switchMonth(month, 1)} className="px-4 py-2 m-3 rounded border">next month</button>
+                <button onClick={() => switchMonth(month, -1)} className="px-4 py-2 m-3 rounded border">prev month
+                </button>
+                <button onClick={() => switchMonth(month, 1)} className="px-4 py-2 m-3 rounded border">next month
+                </button>
             </div>
             <table className="border-collapse w-full text-xs">
                 <thead className="border">
