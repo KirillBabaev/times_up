@@ -13,7 +13,7 @@ const TimesheetTable = ({issues, timeEntries}: TimesheetTableProps) => {
     const [month, setMonth] = useState(new Date());
 
     useEffect(() => {
-        console.log("Month was switched")
+
         // Здесь можно загрузить данные об отслеживании времени для задач
         // и сохранить их в состоянии timeEntries
     }, [month]);
@@ -30,7 +30,7 @@ const TimesheetTable = ({issues, timeEntries}: TimesheetTableProps) => {
 
         const totalTime = timeEntries.filter((entry) => entry.issue?.id === issueId &&
                 getMonth(new Date(entry.spentAt)) === getMonth(month))
-            .reduce((sum, entry) => sum + entry.timeSpent, 0);
+                .reduce((sum, entry) => sum + entry.timeSpent, 0);
 
         return formatTime(totalTime);
     };
@@ -40,8 +40,9 @@ const TimesheetTable = ({issues, timeEntries}: TimesheetTableProps) => {
      * @returns The total time spent in man-days for the month.
      */
     const getTotalTimeForMonthInManDays = () => {
+
         const totalTime = timeEntries.filter(entry => getMonth(new Date(entry.spentAt)) === getMonth(month))
-            .map(entry => entry.timeSpent).reduce((sum, time) => sum + time);
+            .map(entry => entry.timeSpent).reduce((sum, time) => sum + time, 0);
         return getManDays(totalTime);
     }
 

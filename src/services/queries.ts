@@ -59,3 +59,11 @@ export const ISSUE = gql`
       }
     }
     `
+export const LOGIN = gql`
+    query checkLogin {
+            currentUser {
+              id
+              name
+            }
+          }
+    `

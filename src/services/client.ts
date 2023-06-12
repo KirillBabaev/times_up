@@ -1,8 +1,13 @@
 // Используйте свой GitLab API URL и токен
 import {ApolloClient, HttpLink, InMemoryCache} from "@apollo/client";
 
-const GITLAB_API_URL = 'https://gitlab.fel.cvut.cz/api/graphql';
-const GITLAB_API_TOKEN = 'N_h4xdWpVcAyCJzbZGkh';
+// const GITLAB_API_URL = 'https://gitlab.fel.cvut.cz/api/graphql';
+// const GITLAB_API_TOKEN = 'N_h4xdWpVcAyCJzbZGkh';
+
+const GITLAB_API_URL = 'https://gitlab.com/api/graphql';
+const GITLAB_API_TOKEN = localStorage.getItem('gitlabToken');
+
+console.log("im here " + GITLAB_API_TOKEN)
 
 // Создайте HttpLink для связи с GitLab API
 const httpLink = new HttpLink({
