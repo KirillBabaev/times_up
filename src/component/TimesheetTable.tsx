@@ -1,25 +1,15 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {addMonths, format, getDaysInMonth, getMonth} from 'date-fns';
-import {Issue, Timelog} from "../gql/graphql";
 import {getDayColor, formatDay, formatTime, getManDays} from "../utils/DateTimeUtils"
+import {useIssuesData} from "../hooks/issueData";
 
+function TimesheetTable() {
 
-interface TimesheetTableProps {
-    issues: Issue[];
-    timeEntries: Timelog[]
-}
-
-const TimesheetTable = ({issues, timeEntries}: TimesheetTableProps) => {
     const [month, setMonth] = useState(new Date());
-
-    useEffect(() => {
-
-        // Здесь можно загрузить данные об отслеживании времени для задач
-        // и сохранить их в состоянии timeEntries
-    }, [month]);
-
     const daysInMonth = getDaysInMonth(month);
     const daysArray = Array.from({length: daysInMonth}, (_, i) => i + 1);
+    const {issues, timelogs, error} = useIssuesData();
+
 
     /**
      * Calculates the total time spent on a specific issue.
@@ -28,12 +18,13 @@ const TimesheetTable = ({issues, timeEntries}: TimesheetTableProps) => {
      */
     const getTotalTimeForIssue = (issueId: string) => {
 
-        const totalTime = timeEntries.filter((entry) => entry.issue?.id === issueId &&
+        const totalTime = timelogs.filter((entry) => entry.issue?.id === issueId &&
                 getMonth(new Date(entry.spentAt)) === getMonth(month))
                 .reduce((sum, entry) => sum + entry.timeSpent, 0);
 
         return formatTime(totalTime);
     };
+
 
     /**
      * Calculates the total time spent in man-days for a specific month.
@@ -41,10 +32,11 @@ const TimesheetTable = ({issues, timeEntries}: TimesheetTableProps) => {
      */
     const getTotalTimeForMonthInManDays = () => {
 
-        const totalTime = timeEntries.filter(entry => getMonth(new Date(entry.spentAt)) === getMonth(month))
+        const totalTime = timelogs.filter(entry => getMonth(new Date(entry.spentAt)) === getMonth(month))
             .map(entry => entry.timeSpent).reduce((sum, time) => sum + time, 0);
         return getManDays(totalTime);
     }
+
 
     /**
      * Switches the month by adding or subtracting a specified amount of months.
@@ -65,12 +57,18 @@ const TimesheetTable = ({issues, timeEntries}: TimesheetTableProps) => {
      * @returns The formatted time spent on the issue, or an empty string if no entry is found.
      */
     const getTimeForIssueAndDay = (issueId: string, day: number, month: Date) => {
-        const entry = timeEntries.find(
+        const entry = timelogs.find(
             (entry) => entry.issue?.id === issueId &&
                 format(new Date(entry.spentAt), 'd') === day.toString() &&
                 getMonth(new Date(entry.spentAt)) === getMonth(month));
         return entry ? formatTime(entry.timeSpent) : '';
     };
+
+    if(error){
+        return (
+        <h1>Error is occurred: ${error}</h1>
+        )
+    }
 
     return (
         <div className="overflow-x-auto">
@@ -113,6 +111,6 @@ const TimesheetTable = ({issues, timeEntries}: TimesheetTableProps) => {
             </table>
         </div>
     );
-};
+}
 
 export default TimesheetTable;
