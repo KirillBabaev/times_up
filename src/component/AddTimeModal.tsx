@@ -16,8 +16,8 @@ export function AddTimeModal({onClose, issues, currentUser}: AddTimeModalProps) 
     const [errorHours, setErrorHours] = useState('');
     const [errorDate, setErrorDate] = useState('');
     const [errorSummary, setErrorSummary] = useState('');
-    const [hours, setHours] = useState(0);
-    const [minutes, setMinutes] = useState(0);
+    const [hours, setHours] = useState("");
+    const [minutes, setMinutes] = useState("");
     const [summary, setSummary] = useState("");
     const [spentAt, setSpentAt] = useState(new Date());
     const [createTimelog] = useMutation(CREATE_TIMELOG);
@@ -82,8 +82,9 @@ export function AddTimeModal({onClose, issues, currentUser}: AddTimeModalProps) 
         }
     }
 
-    const hoursValidation = function (h: number) {
-        if (h > 8 || h < 0) {
+    const hoursValidation = function (h: string) {
+        const intHour = parseInt(h);
+        if (intHour > 8 || intHour < 0) {
             setErrorHours("The hour value must be greater than 8 and less than 0")
         } else {
             setErrorHours('');
@@ -91,8 +92,9 @@ export function AddTimeModal({onClose, issues, currentUser}: AddTimeModalProps) 
         }
     }
 
-    const minutesValidation = function (m: number) {
-        if (m > 59 || m < 0) {
+    const minutesValidation = function (m: string) {
+        const intMin = parseInt(m);
+        if (intMin > 59 || intMin < 0) {
             setErrorMinutes("The minute value must be greater than 59 and less than 0")
         } else {
             setErrorMinutes('');
@@ -124,11 +126,11 @@ export function AddTimeModal({onClose, issues, currentUser}: AddTimeModalProps) 
                     <div className="flex flex-col items-center">
                         <div className="flex items-center justify-center mt-4">
                             <input id="h" type="number" required={true}
-                                   onChange={e => hoursValidation(parseInt(e.target.value))}
+                                   onChange={e => hoursValidation(e.target.value)}
                                    className={`${numberInputStyle} ${errorHours ? 'border-red-500' : ''}`}/>
                             <label htmlFor="h" className="py-2">Hours</label>
                             <input id="m" type="number" required={true}
-                                   onChange={e => minutesValidation(parseInt(e.target.value))}
+                                   onChange={e => minutesValidation(e.target.value)}
                                    className={`${numberInputStyle} ${errorMinutes ? 'border-red-500' : ''}`}/>
                             <label htmlFor="m" className="py-2">Minutes</label>
                         </div>
