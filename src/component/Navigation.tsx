@@ -3,7 +3,7 @@ import {Link} from "react-router-dom";
 
 export function Navigation(){
     return(
-        <nav className="h-[50px] flex justify-between px-5 bg-gray-500 text-white">
+        <nav className="h-[50px] flex justify-between px-5 bg-blue-500 text-white">
             <span className="font-bold mt-3">TimesUP!</span>
 
             <span className="mt-2">

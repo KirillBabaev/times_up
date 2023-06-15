@@ -6,7 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import {BrowserRouter} from "react-router-dom";
 import {ApolloProvider} from "@apollo/client";
 import {client} from "./services/client";
-
+import {ModalState} from "./context/ModalContext";
 
 
 const root = ReactDOM.createRoot(
@@ -14,9 +14,11 @@ const root = ReactDOM.createRoot(
 );
 root.render(
     <BrowserRouter>
-        <ApolloProvider client={client}>
-        <App/>
-        </ApolloProvider>
+        <ModalState>
+            <ApolloProvider client={client}>
+                <App/>
+            </ApolloProvider>
+        </ModalState>
     </BrowserRouter>
 );
 

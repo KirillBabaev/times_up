@@ -38,24 +38,10 @@ export const ALL_ISSUES = gql`
     }
     `
 
-export const ISSUE = gql`
-    query getIssueById {
-      issue(id: "gid://gitlab/Issue/24077") {
-        title
-        author {
-          name
-        }
-        timelogs {
-          nodes {
-            id
-            user {
-              name
-            }
-            timeSpent
-            spentAt
-            summary
-          }
-        }
+export const CREATE_TIMELOG = gql`
+    mutation addTimelog($input: TimelogCreateInput!){
+      timelogCreate(input: $input){
+        __typename
       }
     }
     `

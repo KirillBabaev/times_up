@@ -33,7 +33,7 @@ export const getDayColor = (date: Date) => {
  */
 export const formatDay = (day: number, month: Date) => {
     const date = setDate(month, day);
-    return format(date, 'd E');
+    return format(date, 'do E');
 }
 
 /**

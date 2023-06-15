@@ -1,14 +1,21 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {addMonths, format, getDaysInMonth, getMonth} from 'date-fns';
 import {getDayColor, formatDay, formatTime, getManDays} from "../utils/DateTimeUtils"
 import {useIssuesData} from "../hooks/issueData";
+
+import {ModalContext} from "../context/ModalContext";
+import {AddTimeModal} from "./AddTimeModal";
+import {User} from "../gql model/graphql";
 
 function TimesheetTable() {
 
     const [month, setMonth] = useState(new Date());
     const daysInMonth = getDaysInMonth(month);
     const daysArray = Array.from({length: daysInMonth}, (_, i) => i + 1);
-    const {issues, timelogs, error} = useIssuesData();
+    const {issues, timelogs, currentUser, error, loading: issuesLoading} = useIssuesData();
+    const monthButtonStyle = "px-4 py-2 m-3 rounded border";
+    const actionButtonStyle = monthButtonStyle + " bg-blue-500 text-white";
+    const {modal, open: modalOpen, close: modalClose} = useContext(ModalContext)
 
 
     /**
@@ -19,8 +26,8 @@ function TimesheetTable() {
     const getTotalTimeForIssue = (issueId: string) => {
 
         const totalTime = timelogs.filter((entry) => entry.issue?.id === issueId &&
-                getMonth(new Date(entry.spentAt)) === getMonth(month))
-                .reduce((sum, entry) => sum + entry.timeSpent, 0);
+            getMonth(new Date(entry.spentAt)) === getMonth(month))
+            .reduce((sum, entry) => sum + entry.timeSpent, 0);
 
         return formatTime(totalTime);
     };
@@ -64,51 +71,105 @@ function TimesheetTable() {
         return entry ? formatTime(entry.timeSpent) : '';
     };
 
-    if(error){
+    const downloadTableAsCSV = () => {
+        const csvContent = createCSVContent();
+        const encodedCSVContent = encodeURIComponent(csvContent);
+        const downloadLink = document.createElement('a');
+        downloadLink.href = `data:text/csv;charset=utf-8,${encodedCSVContent}`;
+        downloadLink.download = `${format(month, "MMMM").toLowerCase()}_timesheet.csv`;
+        downloadLink.click();
+    };
+
+    const createCSVContent = () => {
+        let csvContent = '';
+
+        // Add table headers
+        csvContent += 'Issue,';
+        for (let day = 1; day <= daysInMonth; day++) {
+            const formattedDay = formatDay(day, month);
+            csvContent += `"${formattedDay}",`;
+        }
+        csvContent += 'Total\n';
+
+        // Add table rows
+        for (const issue of issues) {
+            csvContent += `"${issue.title}",`;
+            for (let day = 1; day <= daysInMonth; day++) {
+                const time = getTimeForIssueAndDay(issue.id, day, month);
+                csvContent += `"${time}",`;
+            }
+            const totalTime = getTotalTimeForIssue(issue.id);
+            csvContent += `"${totalTime}"\n`;
+        }
+
+        // Add total man-days row
+        const totalManDays = getTotalTimeForMonthInManDays();
+        csvContent += `MND: ${totalManDays}\n`;
+
+        return csvContent;
+    };
+
+
+    if (error) {
         return (
-        <h1>Error is occurred: ${error}</h1>
+            <h1>Error is occurred: ${error}</h1>
         )
     }
 
     return (
-        <div className="overflow-x-auto">
-            <div className="sticky left-0">
-                <button onClick={() => switchMonth(month, -1)} className="px-4 py-2 m-3 rounded border">prev month
-                </button>
-                <button onClick={() => switchMonth(month, 1)} className="px-4 py-2 m-3 rounded border">next month
+        <div>
+            <div className="flex justify-between">
+                <div className="sticky left-0">
+                    <button onClick={() => switchMonth(month, -1)} className={monthButtonStyle}>prev month
+                    </button>
+                    <button onClick={() => switchMonth(month, 1)} className={monthButtonStyle}>next month
+                    </button>
+                </div>
+                <div className="sticky right-0">
+                    <button onClick={modalOpen} className={actionButtonStyle} disabled={issuesLoading}>Add Timelog
+                    </button>
+                </div>
+            </div>
+            <div className="overflow-x-auto flex">
+                <table className="border-collapse w-full text-xs">
+                    <thead className="border">
+                    <tr className="bg-gray-200">
+                        <th className="sticky left-0 bg-gray-200 px-4 py-2 font-normal">Issue</th>
+                        {daysArray.map((day) => (
+                            <th key={day} className="px-4 py-2 font-normal w-8">
+                                {formatDay(day, month)}
+                            </th>
+                        ))}
+                        <th className="px-4 py-2">Total</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {issues.map((issue) => (
+                        <tr key={issue.id} className="text-center">
+                            <td className="sticky left-0 bg-white border px-4 py-2">{issue.title}</td>
+                            {daysArray.map((day) => (
+                                <td key={day}
+                                    className={"border px-4 py-2 " + getDayColor(new Date(month.getFullYear(), month.getMonth(), day))}>
+                                    {getTimeForIssueAndDay(issue.id, day, month)}
+                                </td>
+                            ))}
+                            <td className="border px-4 py-2">{getTotalTimeForIssue(issue.id)}</td>
+                        </tr>
+                    ))}
+                    <tr className="text-center font-bold">
+                        <td colSpan={daysInMonth + 2}
+                            className="border px-4 py-2 text-left">MND: {getTotalTimeForMonthInManDays()}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <button onClick={() => downloadTableAsCSV()} className={actionButtonStyle}>Download CSV
                 </button>
             </div>
-            <table className="border-collapse w-full text-xs">
-                <thead className="border">
-                <tr className="bg-gray-200">
-                    <th className="sticky left-0 bg-gray-200 px-4 py-2 font-normal">Issue</th>
-                    {daysArray.map((day) => (
-                        <th key={day} className="px-4 py-2 font-normal w-8">
-                            {formatDay(day, month)}
-                        </th>
-                    ))}
-                    <th className="px-4 py-2">Total</th>
-                </tr>
-                </thead>
-                <tbody>
-                {issues.map((issue) => (
-                    <tr key={issue.id} className="text-center">
-                        <td className="sticky left-0 bg-white border px-4 py-2">{issue.title}</td>
-                        {daysArray.map((day) => (
-                            <td key={day}
-                                className={"border px-4 py-2 " + getDayColor(new Date(month.getFullYear(), month.getMonth(), day))}>
-                                {getTimeForIssueAndDay(issue.id, day, month)}
-                            </td>
-                        ))}
-                        <td className="border px-4 py-2">{getTotalTimeForIssue(issue.id)}</td>
-                    </tr>
-                ))}
-                <tr className="text-center font-bold">
-                    <td colSpan={daysInMonth + 2}
-                        className="border px-4 py-2 text-left">MND: {getTotalTimeForMonthInManDays()}</td>
-                </tr>
-                </tbody>
-            </table>
+
+            {modal && <AddTimeModal onClose={modalClose} issues={issues} currentUser={currentUser as User}/>}
+
         </div>
     );
 }
