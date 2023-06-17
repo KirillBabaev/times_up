@@ -1,11 +1,16 @@
 import React, {useState} from 'react';
-import {useApolloClient, gql} from '@apollo/client';
+import {ApolloClient, useApolloClient, useLazyQuery} from '@apollo/client';
+import {LOGIN} from "../services/queries";
+import {Issue, User} from "../gql model/graphql";
+import {Link} from "react-router-dom";
 
-function LoginForm() {
 
-    const apolloClient = useApolloClient();
+export function LoginForm() {
+
     const [token, setToken] = useState('');
     const [error, setError] = useState('');
+    const [login] = useLazyQuery(LOGIN);
+    //const {client} = useApolloClient({});
 
     const handleTokenChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setToken(event.target.value);
@@ -15,39 +20,22 @@ function LoginForm() {
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
 
-        try {
-            // Save token to localStorage
-            localStorage.setItem('gitlabToken', token);
+        // Save token to localStorage
+        localStorage.setItem('gitlabToken', token);
 
-            // Perform Apollo query
-            const {data, errors} = await apolloClient.query({
-                query: gql`
-          query getAllIssues {
-            currentUser {
-              id
-              name
-            }
-          }
-        `,
+        // Perform Apollo query
+        const {data, error} = await login();
+        console.log(data)
+        if (data.currentUser) {
+            console.log("token is OK")
+            //const newClient = useApolloClient();
 
-            });
-
-            if (errors) {
-                // Handle query errors
-                setError('Something went wrong with the query.');
-                return;
-            }
-
-            // If query is successful, redirect to another page
-            if (data.currentUser) {
-                console.log("token is OK")
-                console.log(data)
-                //redirect
-            }
-        } catch (error) {
-            // Handle other errors
-            setError('An error occurred.');
+            //link to timesheet
         }
+        if(error){
+            setError('Something went wrong with the query.')
+        }
+
     };
 
     return (
@@ -67,16 +55,17 @@ function LoginForm() {
                 />
                 {error && <p className="text-red-500 text-xs italic">{error}</p>}
                 <div className="flex items-center justify-center mt-4">
-                    <button
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                        type="submit"
-                        onClick={handleSubmit}>
-                        Login
-                    </button>
+                    <Link to="/timesheet" className="mx-2 my-2">
+                        <button
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                            type="submit"
+                            onClick={handleSubmit}>
+                            Login
+                        </button>
+                    </Link>
                 </div>
             </div>
         </div>
     );
 }
 
-export default LoginForm;

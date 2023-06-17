@@ -1,4 +1,4 @@
-import {Issue, ProjectMember, Timelog, User} from "../gql model/graphql";
+import {Issue, Project, ProjectMember, Timelog, User} from "../gql model/graphql";
 import {ApolloError, useQuery} from "@apollo/client";
 import {ALL_ISSUES} from "../services/queries";
 import {useEffect, useState} from "react";
@@ -8,6 +8,7 @@ export function useIssuesData() {
     const [timelogs, setTimelogs] = useState<Timelog[]>([]);
     const [error, setError] = useState<string>();
     const [currentUser, setCurrentUser] = useState<User>()
+    const [projects, setProjects] = useState<Project[]>([])
 
     const {data: issuesData, loading} = useQuery(ALL_ISSUES);
 
@@ -16,12 +17,13 @@ export function useIssuesData() {
         function fetchData() {
             try {
                 setCurrentUser(issuesData?.currentUser);
-                const fetchedIssues: Issue[] =
-                    issuesData?.currentUser?.projectMemberships.nodes.flatMap((project: ProjectMember) => project?.project?.issues?.nodes) ?? [];
+                const fetchedProjects: Project[] = issuesData?.currentUser?.projectMemberships.nodes.map((member:ProjectMember) => member.project).filter(Boolean) as Project[];
+                setProjects(fetchedProjects);
+                const fetchedIssues: Issue[] = fetchedProjects.flatMap((project: Project) => project?.issues?.nodes).filter(Boolean) as Issue[];
                 setIssues(fetchedIssues);
                 const timeEntries: Timelog[] = (fetchedIssues
                     .flatMap((issue) => issue.timelogs.nodes)
-                    .filter((timelog) => timelog && timelog.user?.id === issuesData?.currentUser?.id) || [])
+                    .filter((timelog) => timelog && timelog.user?.id === issuesData?.currentUser?.id))
                     //remove all null and undefined and explicitly specify the type of the resulting array as Timelog[]
                     .filter(Boolean) as Timelog[];
                 setTimelogs(timeEntries);
@@ -36,5 +38,5 @@ export function useIssuesData() {
         }
     }, [issuesData]);
 
-    return {issues, timelogs, currentUser, error, loading};
+    return {issues, timelogs, currentUser, error, loading, projects};
 }

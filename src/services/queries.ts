@@ -8,6 +8,7 @@ export const ALL_ISSUES = gql`
         projectMemberships {
           nodes {
             project {
+              id
               name
               issues(state: opened) {
                 nodes {
@@ -19,6 +20,7 @@ export const ALL_ISSUES = gql`
                       id
                       issue {
                         id
+                        projectId
                       }
                       timeSpent
                       spentAt
@@ -39,9 +41,21 @@ export const ALL_ISSUES = gql`
     `
 
 export const CREATE_TIMELOG = gql`
-    mutation addTimelog($input: TimelogCreateInput!){
-      timelogCreate(input: $input){
-        __typename
+    mutation addTimelog($input: TimelogCreateInput!) {
+      newTimelog:timelogCreate(input: $input) {
+        timelog{
+          id
+          issue{
+            id
+          }
+          timeSpent
+          spentAt
+          summary
+          user{
+            id
+            name
+          }
+        }
       }
     }
     `

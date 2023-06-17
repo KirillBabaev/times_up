@@ -4,7 +4,7 @@ import TimesheetTable from "./component/TimesheetTable";
 import {Navigation} from "./component/Navigation";
 import {Route, Routes} from "react-router-dom";
 import {Dashboard} from "./component/Dashboard";
-import LoginForm from "./component/LoginForm";
+import {LoginForm} from "./component/LoginForm";
 
 function App() {
 
@@ -14,7 +14,7 @@ function App() {
             <Routes>
                 <Route path="/timesheet" element={<TimesheetTable/>}/>
                 <Route path="/dashboard" element={<Dashboard/>}/>
-                <Route path="" element={<LoginForm/>}/>
+                <Route path="/login" element={<LoginForm/>}/>
             </Routes>
         </div>
     );

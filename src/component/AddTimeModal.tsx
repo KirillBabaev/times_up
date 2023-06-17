@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Issue, TimelogCreateInput, User} from "../gql model/graphql";
 import {useMutation} from "@apollo/client";
-import {CREATE_TIMELOG} from "../services/queries";
+import {ALL_ISSUES, CREATE_TIMELOG} from "../services/queries";
 
 interface AddTimeModalProps {
     onClose: () => void;
@@ -20,8 +20,10 @@ export function AddTimeModal({onClose, issues, currentUser}: AddTimeModalProps) 
     const [minutes, setMinutes] = useState("");
     const [summary, setSummary] = useState("");
     const [spentAt, setSpentAt] = useState(new Date());
-    const [createTimelog] = useMutation(CREATE_TIMELOG);
-    //TODO Add Cache
+    const [createTimelog] = useMutation(CREATE_TIMELOG, {
+        refetchQueries: [ALL_ISSUES]
+    });
+
     const numberInputStyle = "shadow appearance-none border rounded w-14 my-2 mx-4 px-2 text-gray-700 text-right "
 
     useEffect(() => {
