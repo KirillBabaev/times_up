@@ -1,7 +1,8 @@
 import {Issue, Project, ProjectMember, Timelog, User} from "../gql model/graphql";
 import {ApolloError, useQuery} from "@apollo/client";
-import {ALL_ISSUES} from "../services/queries";
+import {ALL_ISSUES, LOGIN} from "../services/queries";
 import {useEffect, useState} from "react";
+import {redirect} from "react-router-dom";
 
 export function useIssuesData() {
     const [issues, setIssues] = useState<Issue[]>([]);
@@ -17,15 +18,15 @@ export function useIssuesData() {
         function fetchData() {
             try {
                 setCurrentUser(issuesData?.currentUser);
-                const fetchedProjects: Project[] = issuesData?.currentUser?.projectMemberships.nodes.map((member:ProjectMember) => member.project).filter(Boolean) as Project[];
+                const fetchedProjects: Project[] = issuesData?.currentUser?.projectMemberships.nodes.map((member:ProjectMember) => member.project).filter(Boolean) as Project[] ?? [];
                 setProjects(fetchedProjects);
-                const fetchedIssues: Issue[] = fetchedProjects.flatMap((project: Project) => project?.issues?.nodes).filter(Boolean) as Issue[];
+                const fetchedIssues: Issue[] = fetchedProjects.flatMap((project: Project) => project?.issues?.nodes).filter(Boolean) as Issue[] ?? [];
                 setIssues(fetchedIssues);
                 const timeEntries: Timelog[] = (fetchedIssues
                     .flatMap((issue) => issue.timelogs.nodes)
                     .filter((timelog) => timelog && timelog.user?.id === issuesData?.currentUser?.id))
                     //remove all null and undefined and explicitly specify the type of the resulting array as Timelog[]
-                    .filter(Boolean) as Timelog[];
+                    .filter(Boolean) as Timelog[] ?? [];
                 setTimelogs(timeEntries);
             } catch (e) {
                 const error = e as ApolloError;

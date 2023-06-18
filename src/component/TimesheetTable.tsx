@@ -6,9 +6,15 @@ import {useIssuesData} from "../hooks/issueData";
 import {ModalContext} from "../context/ModalContext";
 import {AddTimeModal} from "./AddTimeModal";
 import {User} from "../gql model/graphql";
+import {AiOutlineArrowLeft, AiOutlineArrowRight} from "react-icons/ai"
+import {Navigation} from "./Navigation";
+import {useQuery} from "@apollo/client";
+import {LOGIN} from "../services/queries";
+import {Navigate} from "react-router-dom";
 
 function TimesheetTable() {
 
+    const {data: loginData, loading: LoginLoading} = useQuery(LOGIN);
     const [month, setMonth] = useState(new Date());
     const daysInMonth = getDaysInMonth(month);
     const daysArray = Array.from({length: daysInMonth}, (_, i) => i + 1);
@@ -116,13 +122,20 @@ function TimesheetTable() {
         )
     }
 
+    if (!LoginLoading && !loginData.currentUser) {
+        return <Navigate replace to="/login"/>;
+    }
+
     return (
         <div>
+            <Navigation/>
             <div className="flex justify-between">
                 <div className="sticky left-0">
-                    <button onClick={() => switchMonth(month, -1)} className={monthButtonStyle}>prev month
+                    <button onClick={() => setMonth(new Date())} className={monthButtonStyle}>Today
                     </button>
-                    <button onClick={() => switchMonth(month, 1)} className={monthButtonStyle}>next month
+                    <button onClick={() => switchMonth(month, -1)} className={monthButtonStyle}> <AiOutlineArrowLeft/>
+                    </button>
+                    <button onClick={() => switchMonth(month, 1)} className={monthButtonStyle}><AiOutlineArrowRight/>
                     </button>
                 </div>
                 <div className="sticky right-0">

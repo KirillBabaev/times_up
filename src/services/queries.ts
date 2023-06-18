@@ -63,7 +63,6 @@ export const LOGIN = gql`
     query checkLogin {
             currentUser {
               id
-              name
             }
           }
     `

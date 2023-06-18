@@ -1,8 +1,7 @@
 import React, {useState} from 'react';
-import {ApolloClient, useApolloClient, useLazyQuery} from '@apollo/client';
+import {useLazyQuery} from '@apollo/client';
 import {LOGIN} from "../services/queries";
-import {Issue, User} from "../gql model/graphql";
-import {Link} from "react-router-dom";
+import {Link, Navigate} from "react-router-dom";
 
 
 export function LoginForm() {
@@ -10,7 +9,8 @@ export function LoginForm() {
     const [token, setToken] = useState('');
     const [error, setError] = useState('');
     const [login] = useLazyQuery(LOGIN);
-    //const {client} = useApolloClient({});
+    const [isAuthenticated, setAuthenticated] = useState(false);
+
 
     const handleTokenChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setToken(event.target.value);
@@ -19,18 +19,15 @@ export function LoginForm() {
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-
         // Save token to localStorage
-        localStorage.setItem('gitlabToken', token);
 
+        localStorage.setItem('gitlabToken', token);
         // Perform Apollo query
         const {data, error} = await login();
         console.log(data)
         if (data.currentUser) {
             console.log("token is OK")
-            //const newClient = useApolloClient();
-
-            //link to timesheet
+           setAuthenticated(true);
         }
         if(error){
             setError('Something went wrong with the query.')
@@ -38,6 +35,9 @@ export function LoginForm() {
 
     };
 
+    if(isAuthenticated){
+        return <Navigate replace to="/timesheet"/>;
+    }
     return (
         <div className="flex justify-center items-center h-screen min-w-800">
             <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-1/3">
