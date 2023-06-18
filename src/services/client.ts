@@ -3,7 +3,6 @@ import {setContext} from "@apollo/client/link/context";
 
 
 const GITLAB_API_URL = 'https://gitlab.com/api/graphql';
-//const GITLAB_API_TOKEN = 'glpat-YpE5c76RRBP5dAc1rh6R';
 
 const httpLink = createHttpLink({
     uri: GITLAB_API_URL

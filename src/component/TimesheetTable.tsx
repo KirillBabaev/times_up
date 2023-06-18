@@ -77,6 +77,9 @@ function TimesheetTable() {
         return entry ? formatTime(entry.timeSpent) : '';
     };
 
+    /**
+     * Generates a CSV file based on the table data and initiates its download.
+     */
     const downloadTableAsCSV = () => {
         const csvContent = createCSVContent();
         const encodedCSVContent = encodeURIComponent(csvContent);
@@ -86,6 +89,10 @@ function TimesheetTable() {
         downloadLink.click();
     };
 
+    /**
+     * Generates the content for a CSV file based on the issues data.
+     * @returns The CSV content as a string.
+     */
     const createCSVContent = () => {
         let csvContent = '';
 

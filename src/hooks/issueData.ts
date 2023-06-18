@@ -1,9 +1,12 @@
 import {Issue, Project, ProjectMember, Timelog, User} from "../gql model/graphql";
 import {ApolloError, useQuery} from "@apollo/client";
-import {ALL_ISSUES, LOGIN} from "../services/queries";
+import {ALL_ISSUES} from "../services/queries";
 import {useEffect, useState} from "react";
-import {redirect} from "react-router-dom";
 
+/**
+ * Custom hook to fetch and manage issues data.
+ * @returns An object containing the fetched issues, timelogs, current user, error status, loading state, and projects.
+ */
 export function useIssuesData() {
     const [issues, setIssues] = useState<Issue[]>([]);
     const [timelogs, setTimelogs] = useState<Timelog[]>([]);
@@ -12,7 +15,6 @@ export function useIssuesData() {
     const [projects, setProjects] = useState<Project[]>([])
 
     const {data: issuesData, loading} = useQuery(ALL_ISSUES);
-
 
     useEffect(() => {
         function fetchData() {

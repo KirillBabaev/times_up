@@ -29,12 +29,22 @@ export function AddTimeModal({onClose, issues, currentUser}: AddTimeModalProps) 
     useEffect(() => {
     }, [selectedIssue]);
 
+    /**
+     * A handler function for choosing an issue.
+     *
+     * @param id - The ID of the selected issue.
+     */
     const chooseHandler = function (id: string) {
         console.log(id);
         const chosenIssue = issues.filter(issue => issue.id === id)[0];
         setSelectedIssue(chosenIssue);
     }
 
+    /**
+     * A function for a form which creates new timelog
+     *
+     * @param e - The form event.
+     */
     const submitHandler = function (e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
         try {
@@ -61,6 +71,11 @@ export function AddTimeModal({onClose, issues, currentUser}: AddTimeModalProps) 
 
     }
 
+    /**
+     * A function for validating a date.
+     *
+     * @param dateStr - The date string to be validated.
+     */
     const dateValidation = function (dateStr: string) {
         const date = new Date(dateStr);
         console.log(date.toISOString())
@@ -75,6 +90,11 @@ export function AddTimeModal({onClose, issues, currentUser}: AddTimeModalProps) 
         }
     }
 
+    /**
+     * A function for validating a summary.
+     *
+     * @param sum - The summary to be validated.
+     */
     const summaryValidation = function (sum: string) {
         if (sum.length > 100) {
             setErrorSummary("Max 100 characters");
@@ -84,6 +104,11 @@ export function AddTimeModal({onClose, issues, currentUser}: AddTimeModalProps) 
         }
     }
 
+    /**
+     * A function for validating hours.
+     *
+     * @param h - The hour value to be validated.
+     */
     const hoursValidation = function (h: string) {
         const intHour = parseInt(h);
         if (intHour > 8 || intHour < 0) {
@@ -94,6 +119,11 @@ export function AddTimeModal({onClose, issues, currentUser}: AddTimeModalProps) 
         }
     }
 
+    /**
+     * A function for validating minutes.
+     *
+     * @param m - The minute value to be validated.
+     */
     const minutesValidation = function (m: string) {
         const intMin = parseInt(m);
         if (intMin > 59 || intMin < 0) {

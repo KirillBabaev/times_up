@@ -11,25 +11,31 @@ export function LoginForm() {
     const [login] = useLazyQuery(LOGIN);
     const [isAuthenticated, setAuthenticated] = useState(false);
 
-
+    /**
+     * Handles the change event of the token input field.
+     * @param event - The change event of the input field.
+     */
     const handleTokenChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setToken(event.target.value);
         setError('');
     };
 
+    /**
+     * Handles the form submission event.
+     * @param event - The form submission event.
+     */
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        // Save token to localStorage
 
+        // Save token to localStorage
         localStorage.setItem('gitlabToken', token);
         // Perform Apollo query
-        const {data, error} = await login();
+        const {data} = await login();
         console.log(data)
-        if (data.currentUser) {
+        if (data) {
             console.log("token is OK")
            setAuthenticated(true);
-        }
-        if(error){
+        }else{
             setError('Something went wrong with the query.')
         }
 

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {
     LineChart,
     Line,
@@ -17,7 +17,7 @@ import {AiOutlineArrowLeft, AiOutlineArrowRight} from "react-icons/ai";
 import {Navigation} from "./Navigation";
 import {useQuery} from "@apollo/client";
 import {LOGIN} from "../services/queries";
-import {Navigate, redirect} from "react-router-dom";
+import {Navigate} from "react-router-dom";
 
 export function Dashboard() {
 
@@ -28,6 +28,11 @@ export function Dashboard() {
     const {timelogs, projects} = useIssuesData();
     const monthButtonStyle = "px-4 py-2 m-3 rounded border";
 
+    /**
+     * Formats a date for comparison purposes.
+     * @param date - The date to be formatted. Can be a number or a string.
+     * @returns The formatted date in the "dd/MM/yyyy" format.
+     */
     const formatComparisonDate = function (date: number | string) {
         if (typeof date === 'string') {
             return format(new Date(date), "dd/MM/yyyy")
@@ -37,6 +42,10 @@ export function Dashboard() {
     }
 
 
+    /**
+     * Generates data for a LineChart based on timelogs and daysArray.
+     * @returns An array of objects representing data with 'name' and 'Hours' properties.
+     */
     const createLineData = function () {
         const lineDataList: { name: string; Hours: number; }[] = [];
         daysArray.forEach(day => {
@@ -51,6 +60,10 @@ export function Dashboard() {
         return lineDataList;
     };
 
+    /**
+     * Generates data for a PieChart based on projects and timelogs.
+     * @returns An array of objects representing data with 'name' and 'value' properties.
+     */
     const createPieData = function () {
         const linePieList: { name: string; value: number; }[] = [];
         projects.forEach((project) => {
@@ -73,6 +86,18 @@ export function Dashboard() {
     const COLORS = schemeSet2.slice(0, pieData.length);
 
     const RADIAN = Math.PI / 180;
+
+    /**
+     *A function that renders a customized label for a pie chart slice.
+     * @param params - The parameters for rendering the label.
+     * @param params.cx - The x-coordinate of the center of the pie chart.
+     * @param params.cy - The y-coordinate of the center of the pie chart.
+     * @param params.midAngle - The mid-angle of the pie chart slice.
+     * @param params.innerRadius - The inner radius of the pie chart.
+     * @param params.outerRadius - The outer radius of the pie chart.
+     * @param params.percent - The percentage value for the slice.
+     * @returns {React.Element} - The JSX element representing the customized label.
+     */
     // @ts-ignore
     const renderCustomizedLabel = ({cx, cy, midAngle, innerRadius, outerRadius, percent}) => {
         const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
